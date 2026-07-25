@@ -1,14 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authApi } from '../api/authApi';
-import { useNavigate } from 'react-router-dom'; // Add this
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('shophub_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      return null;
+    }
   });
+
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   const login = (userData) => {
     setUser(userData);
@@ -26,6 +34,13 @@ export const AuthProvider = ({ children }) => {
   //     navigate('/login'); // Use navigate instead of window.location
   //   }
   // };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    // Optional: redirect them to login page when logged out
+    window.location.href = '/login'; 
+  };
 
   // We listen for the 'session-expired' event that Axios sends.
   useEffect(() => {
