@@ -23,7 +23,10 @@ app.use(express.json());
 app.use(cookieParser()); // Critical for reading HTTP-Only cookies
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Update this to match your React frontend URL
+  origin: [
+    'http://localhost:5173',
+  'https://ecommerce-website-frontend-hhuq.onrender.com'
+  ], // Update this to match your React frontend URL
   credentials: true, // Critical for allowing cookies cross-origin
 }));
 
