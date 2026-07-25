@@ -1,28 +1,31 @@
 import axios from 'axios';
 
+const BASE_URL = 'https://ecommerce-website-backend-w3ob.onrender.com/api';
+
 const axiosInstance = axios.create({
-  baseURL: 'https://ecommerce-website-backend-w3ob.onrender.com/api', // Must match your backend port
-  withCredentials: true, // CRITICAL: Tells browser to send HTTP-Only cookies
+  baseURL: BASE_URL,
+  withCredentials: true,
 });
 
-// Response Interceptor for Silent Token Refresh
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 (Unauthorized) and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // FIX: Prevent infinite loop if the refresh request itself fails
+      if (originalRequest.url.includes('/api/auth/refresh')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       try {
-        // Attempt to silently refresh the token
-        await axios.post('https://ecommerce-website-backend-w3ob.onrender.com/api/auth/refresh', {}, { withCredentials: true });
-        // 'http://localhost:4000/api/auth/refresh'
-        // If successful, retry the original failed request
+        await axios.post(`${BASE_URL}/api/auth/refresh`, {}, { withCredentials: true });
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // If refresh fails (session truly expired), force logout
-        window.location.href = '/login';
+        // FIX: Remove window.location.href to stop the infinite refresh loop.
+        // Instead, we broadcast an event that the token is dead.
+        window.dispatchEvent(new CustomEvent('session-expired'));
         return Promise.reject(refreshError);
       }
     }
@@ -30,4 +33,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance; 
+export default axiosInstance;

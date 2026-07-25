@@ -1,7 +1,7 @@
 // src/App.jsx - FINAL CLEAN VERSION
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { AuthProvider} from './context/AuthContext';
 import AdminRoute from './components/AdminRoute';
 
 // Layouts & Pages
@@ -31,6 +31,22 @@ import Support from './pages/Support';
 import Settings from './pages/Settings';
 
 const App = () => {
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      
+      setUser(null);
+      
+      localStorage.removeItem('user'); 
+      window.location.pathname = '/login';
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+    
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
+  }, []);
   return (
     
       <AuthProvider>

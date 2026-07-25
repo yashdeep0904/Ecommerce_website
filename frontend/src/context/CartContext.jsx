@@ -15,7 +15,6 @@ export const CartProvider = ({ children }) => {
 
   // 1. Helper to sync calculations instantly
   const updateCartState = (items) => {
-    // Failsafe: Ensure items is always an array
     const safeItems = Array.isArray(items) ? items : [];
     
     setCartItems(safeItems);
@@ -26,27 +25,30 @@ export const CartProvider = ({ children }) => {
     setCartCount(count);
   };
 
-  // 2. The Fetch Engine (Waits for Auth, then fetches)
+  // 2. The Fetch Engine
   useEffect(() => {
     let isMounted = true;
 
     const fetchCart = async () => {
-      // Gatekeeper: Do nothing while AuthContext is still loading the session
+      // Gatekeeper: Do nothing while AuthContext is still loading
       if (isAuthLoading) return;
 
-      // 🟢 RELAXED CHECK: If any user is logged in, fetch their cart
-      if (user) {
+      // STRICT CHECK: Ensure user exists and isn't just an empty object {}
+      if (user && Object.keys(user).length > 0) {
         setIsCartLoading(true);
         try {
           const data = await storeApi.getCart();
           
           if (isMounted) {
-            // Accommodate different backend response structures safely
             const itemsToLoad = data?.items || data?.cart?.items || [];
             updateCartState(itemsToLoad);
           }
         } catch (err) {
-          console.error("Cart fetch failed on reload:", err);
+          // FIX: Don't spam the console if the error is just a 401 Unauthorized
+          // The Axios interceptor will handle the 401 gracefully.
+          if (err?.response?.status !== 401) {
+            console.error("Cart fetch failed on reload:", err);
+          }
         } finally {
           if (isMounted) setIsCartLoading(false);
         }
@@ -69,7 +71,6 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product) => {
     if (!user) return toast.error("Please log in to add items.");
     
-    // Failsafe Image Extraction
     const image = product?.images?.[0]?.url || product?.image || product?.imageUrl || 'https://via.placeholder.com/150';
 
     try {
@@ -115,7 +116,6 @@ export const CartProvider = ({ children }) => {
       toast.error("Failed to clear cart");
     }
   };
-  
 
   return (
     <CartContext.Provider value={{ 
@@ -127,5 +127,4 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// 🟢 CRITICAL FIX: This was incorrectly pointing to AuthContext previously!
 export const useCart = () => useContext(CartContext);
