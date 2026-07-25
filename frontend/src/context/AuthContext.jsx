@@ -15,20 +15,33 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('shophub_user', JSON.stringify(userData));
   };
 
-  const logout = async (navigate) => { // Accept navigate here
-    try {
-      await authApi.logoutUser();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      setUser(null);
-      localStorage.removeItem('shophub_user');
-      navigate('/login'); // Use navigate instead of window.location
-    }
-  };
+  // const logout = async (navigate) => { // Accept navigate here
+  //   try {
+  //     await authApi.logoutUser();
+  //   } catch (err) {
+  //     console.error("Logout error:", err);
+  //   } finally {
+  //     setUser(null);
+  //     localStorage.removeItem('shophub_user');
+  //     navigate('/login'); // Use navigate instead of window.location
+  //   }
+  // };
+
+  // We listen for the 'session-expired' event that Axios sends.
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      logout(); // Call YOUR specific logout function here!
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+    
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout,setUser }}>
       {children}
     </AuthContext.Provider>
   );

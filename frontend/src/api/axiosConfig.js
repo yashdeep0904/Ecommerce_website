@@ -20,7 +20,7 @@ axiosInstance.interceptors.response.use(
 
       originalRequest._retry = true;
       try {
-        await axios.post(`${BASE_URL}/api/auth/refresh`, {}, { withCredentials: true });
+        await axios.post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true });
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         // FIX: Remove window.location.href to stop the infinite refresh loop.

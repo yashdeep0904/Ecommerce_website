@@ -12,6 +12,7 @@ import Users from './pages/Users';
 import ManageProducts from './pages/ManageProducts';
 
 // Auth Pages (Keep your paths exactly as they are)
+
 import Login from './pages/SignUp Page/Login';
 import Signup from './pages/SignUp Page/Signup';
 import SetPassword from './pages/SignUp Page/SetPassword';
@@ -31,6 +32,8 @@ import Support from './pages/Support';
 import Settings from './pages/Settings';
 
 const App = () => {
+
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     const handleSessionExpired = () => {
