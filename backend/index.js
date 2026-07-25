@@ -20,6 +20,7 @@ const app = express();
 app.use(helmet()); 
 app.use(express.json());
 app.use(cookieParser()); // Critical for reading HTTP-Only cookies
+app.set('trust proxy', 1);
 
 app.use(cors({
   origin: [
