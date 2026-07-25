@@ -44,6 +44,10 @@ try {
   process.exit(1); // Stop server if DB fails
 }
 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: "Ecommerce website backend server is active and secure." });
+});
+
 // 4. Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);

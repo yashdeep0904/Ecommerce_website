@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000/api', // Must match your backend port
+  baseURL: 'https://ecommerce-website-backend-w3ob.onrender.com', // Must match your backend port
   withCredentials: true, // CRITICAL: Tells browser to send HTTP-Only cookies
 });
 
@@ -16,8 +16,8 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         // Attempt to silently refresh the token
-        await axios.post('http://localhost:4000/api/auth/refresh', {}, { withCredentials: true });
-        
+        await axios.post('https://ecommerce-website-backend-w3ob.onrender.com', {}, { withCredentials: true });
+        // 'http://localhost:4000/api/auth/refresh'
         // If successful, retry the original failed request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
