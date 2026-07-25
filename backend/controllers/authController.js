@@ -5,10 +5,17 @@ import redisClient from '../config/redis.js';
 import sendEmail from '../utils/sendEmail.js';
 
 // Update this object at the top of controllers/authController.js
+// const cookieOptions = {
+//   httpOnly: true,
+//   secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production only
+//   sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // 'lax' allows cross-port local dev
+// };
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production only
-  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // 'lax' allows cross-port local dev
+  secure: true, // MUST be true for cross-site cookies
+  sameSite: 'none', // CRITICAL: This allows the cookie to be sent between different Render URLs
+  maxAge: 7 * 24 * 60 * 60 * 1000 // Or whatever your expiry is
 };
 
 // Utility to generate Access & Refresh Tokens

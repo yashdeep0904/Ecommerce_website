@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  // 1. Initialize user state from local storage
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -12,40 +13,32 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Stop loading immediately after mount
   useEffect(() => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData) => {
+  // 3. DEFINE THE LOGIN FUNCTION
+  const login = useCallback((userData) => {
     setUser(userData);
-    localStorage.setItem('shophub_user', JSON.stringify(userData));
-  };
+    localStorage.setItem('user', JSON.stringify(userData));
+  }, [setUser]); 
 
-  // const logout = async (navigate) => { // Accept navigate here
-  //   try {
-  //     await authApi.logoutUser();
-  //   } catch (err) {
-  //     console.error("Logout error:", err);
-  //   } finally {
-  //     setUser(null);
-  //     localStorage.removeItem('shophub_user');
-  //     navigate('/login'); // Use navigate instead of window.location
-  //   }
-  // };
-
-  const logout = () => {
+  // 4. DEFINE THE LOGOUT FUNCTION
+  const logout = useCallback(() => {
+    console.warn("Logout triggered. Clearing user session.");
     setUser(null);
     localStorage.removeItem('user');
-    // Optional: redirect them to login page when logged out
     window.location.href = '/login'; 
-  };
+  }, [setUser]); 
 
-  // We listen for the 'session-expired' event that Axios sends.
+  // 5. Listen for the 'session-expired' event from axiosConfig.js
   useEffect(() => {
     const handleSessionExpired = () => {
-      logout(); // Call YOUR specific logout function here!
+      console.error("Session expired event received! Forcing user to login screen.");
+      logout(); 
     };
 
     window.addEventListener('session-expired', handleSessionExpired);
@@ -53,13 +46,23 @@ export const AuthProvider = ({ children }) => {
     return () => {
       window.removeEventListener('session-expired', handleSessionExpired);
     };
-  }, []);
+  }, [logout]); 
 
   return (
-    <AuthContext.Provider value={{ user, login, logout,setUser }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// 🟢 CRITICAL FIX: Failsafe to prevent React crashes if providers are in the wrong order
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error(
+      "❌ useAuth was called outside of AuthProvider! " + 
+      "Check your App.jsx or main.jsx and ensure <CartProvider> is nested INSIDE <AuthProvider>."
+    );
+  }
+  return context;
+};

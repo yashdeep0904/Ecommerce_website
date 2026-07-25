@@ -1,5 +1,5 @@
 // src/App.jsx - FINAL CLEAN VERSION
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider} from './context/AuthContext';
 import AdminRoute from './components/AdminRoute';
