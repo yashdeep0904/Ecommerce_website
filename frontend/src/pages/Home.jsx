@@ -71,11 +71,17 @@ const Home = () => {
       }
     };
 
-    const delayDebounceFn = setTimeout(() => {
+    // If the user is typing a search, delay the fetch (debounce)
+    if (searchQuery) {
+      const delayDebounceFn = setTimeout(() => {
+        if (isStorefrontRoute) fetchCatalog();
+      }, 400); 
+      return () => clearTimeout(delayDebounceFn);
+    } 
+    // Otherwise (initial load, category change, sort change), fetch instantly
+    else {
       if (isStorefrontRoute) fetchCatalog();
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
+    }
   }, [searchQuery, selectedCategory, sortOrder, location.pathname]);
 
   // --- Wishlist Toggle Handler ---
@@ -148,8 +154,6 @@ const Home = () => {
                         </button>
                       )}
                     </div>
-                    
-                    {/* Optional Right Side Graphic/Illustration space can go here if needed later */}
                   </div>
 
                   {/* --- COMPACT COMMAND BAR (Filters & Search) --- */}
